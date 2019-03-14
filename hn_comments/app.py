@@ -7,9 +7,10 @@ from .models import DB, Comments
 
 def create_app():
     app = Flask(__name__)
+    CORS(app)
     app.config['SQLALCHEMY_DATABASE_URI'] = config("DATABASE_URL")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    CORS(app)
+
     DB.init_app(app)
 
     @app.route('/')
@@ -30,5 +31,4 @@ def create_app():
 
         return jsonify(results)
 
-    @app.route('topic ')
     return app
