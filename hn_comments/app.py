@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, jsonify
 from decouple import config
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 from .models import DB, Comments
 
 
@@ -8,7 +9,7 @@ def create_app():
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = config("DATABASE_URL")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
+    CORS(app)
     DB.init_app(app)
 
     @app.route('/')
@@ -28,4 +29,6 @@ def create_app():
                 results.append(result)
 
         return jsonify(results)
+
+    @app.route('topic ')
     return app
