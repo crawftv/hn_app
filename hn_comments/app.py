@@ -23,25 +23,19 @@ def create_app():
     @app.route('/user_lookup/<user_id>', methods=['GET'])
     def user_lookup(user_id):
 
-        if request.method == "GET":
+        def avg_sentiment(user_id):
             query = DB.session.query(Comments).filter_by(
                 user_id=user_id).limit(500).all()
             num_results = len(query)
+            compound_sentiment = functools.reduce(
+                lambda x, y: x+y, [q.compound for q in query]) / num_results
 
-            def avg_sentiment(user_id):
-                compound_sentiment = functools.reduce(
-                    lambda x, y: x+y, [q.compound for q in query]) / num_results
-                return compound_sentiment
+            return compound_sentiment
 
-            def top_10_saltiest_comments(user_id):
-
-                top_10 = DB.session.query(Comments.text, Comments.compound).filter_by(
-                    user_id=user_id).order_by(Comments.compound.asc()).limit(10).all()
-                return top_10
-            if num_results > 0:
-                return jsonify(user_average_sentiment=avg_sentiment(user_id), top_10=top_10_saltiest_comments(user_id))
-            else:
-                return jsonify("No such user found")
+        def top_10_saltiest_comments(user_id):
+            top_10 = DB.session.query(Comments.text, Comments.compound).filter_by(
+                user_id=user_id).order_by(Comments.compound.asc()).limit(10).all()
+            return top_10
 
         return jsonify(user_average_sentiment=avg_sentiment(user_id), top_10=top_10_saltiest_comments(user_id))
 
@@ -52,12 +46,9 @@ def create_app():
             query = DB.session.query(Comments).filter(
                 Comments.text.like('%'+topic+'%')).limit(2500).all()
             num_results = len(query)
-            if num_results > 0:
-                compound_sentiment = functools.reduce(
-                    lambda x, y: x+y, [q.compound for q in query]) / num_results
-                return jsonify(compound_sentiment=compound_sentiment)
-            else:
-                return jsonify("No comments found with topic")
+            compound_sentiment = functools.reduce(
+                lambda x, y: x+y, [q.compound for q in query]) / num_results
+        return jsonify(compound_sentiment=compound_sentiment)
 
     @app.route('/saltiest_commenters', methods=["GET"])
     def saltiest_commenters():
