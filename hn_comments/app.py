@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from sqlalchemy import func
 from .models import DB, Comments
-import numpy as np
+
 import functools
 
 
@@ -67,7 +67,7 @@ def create_app():
 
         return jsonify(query)
     return app
-
+    #import numpy as np
     # @app.route('/topic_sentiment_chart/<topic>', methods=['GET'])
     # def topic_sentiment_chart(topic):
 
