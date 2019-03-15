@@ -23,26 +23,28 @@ def create_app():
     def user_lookup(user_id):
 
         if request.method == "GET":
-            query = DB.session.query(Comments).filter_by(
-                user_id=user_id).limit(500).all()
-            compound_sentiment = functools.reduce(
-                lambda x, y: x+y, [q.compound for q in query]) / num_results
-            # todo saltiest comments
-            # result = list(map(lambda x:
-            #                   {"user_id": x.user_id, "text": x.text,
-            #                    "compound_sentiment": x.compound},
-            #                   query))
+            def avg_sentiment(user_id):
+                query = DB.session.query(Comments).filter_by(
+                    user_id=user_id).limit(500).all()
+                num_results = len(query)
+                compound_sentiment = functools.reduce(
+                    lambda x, y: x+y, [q.compound for q in query]) / num_results
 
-        # return jsonify(result)
-        return jsonify(user_average_sentiment=compound_sentiment)
+                return compound_sentiment
+
+            def top_10_saltiest_comments(user_id):
+                top_10 = DB.session.query(Comments.text, Comments.compound).filter_by(
+                    user_id=user_id).order_by(Comments.compound.asc()).limit(10).all()
+                return top_10
+
+        return jsonify(user_average_sentiment=avg_sentiment(user_id), top_10=top_10_saltiest_comments(user_id))
 
     @app.route('/topic_sentiment/<topic>', methods=['GET'])
     def topic_sentiment(topic):
 
         if request.method == "GET":
-            results = []
-            query = DB.session.query(Comments
-                                     ).filter(Comments.text.like('%'+topic+'%')).limit(2500).all()
+            query = DB.session.query(Comments).filter(
+                Comments.text.like('%'+topic+'%')).limit(2500).all()
             num_results = len(query)
 
             compound_sentiment = functools.reduce(
