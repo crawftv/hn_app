@@ -24,19 +24,24 @@ def create_app():
     def user_lookup(user_id):
 
         if request.method == "GET":
+            query = DB.session.query(Comments).filter_by(
+                user_id=user_id).limit(500).all()
+            num_results = len(query)
+
             def avg_sentiment(user_id):
-                query = DB.session.query(Comments).filter_by(
-                    user_id=user_id).limit(500).all()
-                num_results = len(query)
                 compound_sentiment = functools.reduce(
                     lambda x, y: x+y, [q.compound for q in query]) / num_results
-
                 return compound_sentiment
 
             def top_10_saltiest_comments(user_id):
+
                 top_10 = DB.session.query(Comments.text, Comments.compound).filter_by(
                     user_id=user_id).order_by(Comments.compound.asc()).limit(10).all()
                 return top_10
+            if num_results > 0:
+                return jsonify(user_average_sentiment=avg_sentiment(user_id), top_10=top_10_saltiest_comments(user_id))
+            else:
+                return jsonify("No such user found")
 
         return jsonify(user_average_sentiment=avg_sentiment(user_id), top_10=top_10_saltiest_comments(user_id))
 
