@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from sqlalchemy import func
 from .models import DB, Comments
+import numpy as np
 import functools
 
 
@@ -41,15 +42,17 @@ def create_app():
 
     @app.route('/topic_sentiment/<topic>', methods=['GET'])
     def topic_sentiment(topic):
-
+        topic = topic.replace("_", " ")
         if request.method == "GET":
             query = DB.session.query(Comments).filter(
                 Comments.text.like('%'+topic+'%')).limit(2500).all()
             num_results = len(query)
-
-            compound_sentiment = functools.reduce(
-                lambda x, y: x+y, [q.compound for q in query]) / num_results
-        return jsonify(compound_sentiment=compound_sentiment)
+            if num_results > 0:
+                compound_sentiment = functools.reduce(
+                    lambda x, y: x+y, [q.compound for q in query]) / num_results
+                return jsonify(compound_sentiment=compound_sentiment)
+            else:
+                return jsonify("No comments found with topic")
 
     @app.route('/saltiest_commenters', methods=["GET"])
     def saltiest_commenters():
@@ -59,3 +62,16 @@ def create_app():
 
         return jsonify(query)
     return app
+
+    # @app.route('/topic_sentiment_chart/<topic>', methods=['GET'])
+    # def topic_sentiment_chart(topic):
+
+    #     if request.method == "GET":
+    #         query = DB.session.query(Comments).filter(
+    #             Comments.text.like('%'+topic+'%')).limit(2500).all()
+    #         compound = [q.compound for q in query]
+    #         hist = np.histogram(compound, bins=10)
+    #         hist = (list(hist[0]), list(hist[1]))
+    #         hist = jsonify(hist)
+
+    #     return render_template('topic.html', hist=hist)
