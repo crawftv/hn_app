@@ -1,9 +1,10 @@
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify,json
 from decouple import config
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from sqlalchemy import func
 from .models import DB, Comments
+import numpy as np
 
 import functools
 
@@ -18,8 +19,47 @@ def create_app():
 
     @app.route('/')
     def root():
-        return "root"
+        return render_template('root.html')
 
+
+    @app.route('/topic', methods=['GET'])
+    def topic():
+        topic = request.values["topic"]
+        topic = topic.replace("_", " ")
+        if request.method == "GET":
+            query = DB.session.query(Comments).filter(
+                Comments.text.like('%'+topic+'%')).limit(2500).all()
+            num_results = len(query)
+            compound = [q.compound for q in query]
+            hist = np.histogram(compound, bins=10, range=(-1,1))
+         
+            data = json.dumps([int(hist[0][i])  for i in range(len(hist[0]))] )
+            compound_sentiment = functools.reduce(
+                lambda x, y: x+y, compound) / num_results
+        return render_template("topic_sentiment.html", 
+        compound_sentiment =compound_sentiment, topic= topic, data = data)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    """React App funtionality"""
     @app.route('/user_lookup/<user_id>', methods=['GET'])
     def user_lookup(user_id):
 
@@ -32,7 +72,7 @@ def create_app():
 
             return compound_sentiment
 
-        def top_10_saltiest_comments(user_id):
+        def top_10_saltiest_comments(user_id): 
             top_10 = DB.session.query(Comments.text, Comments.compound).filter_by(
                 user_id=user_id).order_by(Comments.compound.asc()).limit(10).all()
             return top_10
@@ -57,6 +97,7 @@ def create_app():
                 Comments.user_id), func.avg(Comments.compound)).group_by(Comments.user_id).having(func.count(Comments.user_id) > 49).order_by(func.avg(Comments.compound).asc()).limit(10).all()
 
         return jsonify(query)
+
     return app
     #import numpy as np
     # @app.route('/topic_sentiment_chart/<topic>', methods=['GET'])

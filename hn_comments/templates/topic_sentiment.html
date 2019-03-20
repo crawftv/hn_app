@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.js"> </script>
+</head>
+
+<body>
+    {% block content %}
+    <h2>{{topic}}</h2>
+
+    <p>The average sentiment hacker news sentiment for {{topic}} is {{ compound_sentiment }}.</p>
+    <canvas id="bar-chart" width="800" height="450"></canvas>
+
+
+    {% block javascript %}
+    <script>
+        hist = JSON.parse({{ data | tojson}})
+        new Chart(document.getElementById("bar-chart"), {
+            type: 'bar',
+            data: {
+                labels: ["-1.0", "-0.8", "-0.6", "-0.4", "-0.2", "0.2", "0.4", "0.6", "0.8", "1.0"],
+                datasets: [
+                    {
+                        label: "Number of mentions per sentiment",
+                        backgroundColor: ["#3e95cd", "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850"],
+                        data: hist
+                    }
+                ]
+
+            },
+            options: {
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: 'Hacker news sentiment'
+                }
+            }
+        });
+        // new Chart(document.getElementById("bar-chart"), {
+        //     type: 'bar',
+        //     data: {
+        //         labels: ["Africa", "Asia", "Europe", "Latin America", "North America"],
+        //         datasets: [
+        //             {
+        //                 label: "Population (millions)",
+        //                 backgroundColor: ["#3e95cd", "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850"],
+        //                 data: [2478, 5267, 734, 784, 433]
+        //             }
+        //         ]
+        //     },
+        //     options: {
+        //         legend: { display: false },
+        //         title: {
+        //             display: true,
+        //             text: 'Predicted world population (millions) in 2050'
+        //         }
+        //     }
+        // });
+
+    </script>
+    <script>
+        hist = JSON.parse({{ data | tojson}})
+        console.log(hist)
+    </script>
+    {% endblock %}
+    {% endblock %}
+
+</body>
