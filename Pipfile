@@ -12,6 +12,8 @@ gunicorn = "*"
 psycopg2 = "*"
 python-decouple = "*"
 flask-cors = "*"
+numpy = "*"
+sqlalchemy = "*"
 
 [requires]
 python_version = "3.6"
