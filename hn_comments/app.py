@@ -33,7 +33,7 @@ def create_app():
             compound = [q.compound for q in query]
             hist = np.histogram(compound, bins=10, range=(-1,1))
          
-            data = json.dumps([int(hist[0][i])  for i in range(len(hist[0]))] )
+            data = json.dumps([int(hist[0][i])/num_results*100  for i in range(len(hist[0]))] )
             compound_sentiment = functools.reduce(
                 lambda x, y: x+y, compound) / num_results
         return render_template("topic_sentiment.html", 
