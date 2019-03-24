@@ -10,25 +10,25 @@
     <h2>{{user_id}}</h2>
 
     <p>The average sentiment hacker news sentiment for {{user_id}} is {{ user_average_sentiment }}.</p>
-    <canvas id="bar-chart" width="800" height="450"></canvas>
+    <canvas id="pie-chart" width="800" height="450"></canvas>
 
 
     {% block javascript %}
     <script>
-        labels = JSON.parse({{ keys | tojson}})
+	Chart.defaults.global.animation = true;
+	labels = JSON.parse({{ keys | tojson}})
 	data = JSON.parse({{ values |tojson }})
-        new Chart(document.getElementById("bar-chart"), {
-            type: 'bar',
+        new Chart(document.getElementById("pie-chart"), {
+            type: 'doughnut',
             data: {
                 labels: labels,
                 datasets: [
                     {
                         label: "% of mentions in this sentiment range",
-                        backgroundColor: ["rgba(192, 0, 14, 0.5)",,
-                        "rgba(250, 97, 109, 0.5)",
-                        "rgba(29, 211, 0, 0.5)"],
-                        borderColor: ["rgba(192, 0, 14)","rgba(250, 97, 109)",
-                        "rgba(29, 211, 0)"],
+                        backgroundColor: ["rgba(253, 0, 6, 0.5)", "rgba(255, 250, 0, 0.5)",
+                        "rgba(10, 207, 0, 0.5)"],
+                        borderColor: ["rgba(253, 0, 6)","rgba(255, 250, 0)",
+                        "rgba(10, 207, 0)"],
                         
                         borderWidth:2,
                         data: data
@@ -37,11 +37,16 @@
 
             },
             options: {
-                legend: { display: false },
+                legend: { display: true },
                 title: {
                     display: true,
-                    text: 'Hacker news sentiment'
-                }
+                    text: 'Number of Comments with each Sentiment Type'
+                },
+		animation: {
+			      animateRotate: true,
+			      animateScale: false
+			    }
+		
             }
         });
         
