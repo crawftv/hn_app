@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.js"> </script>
+</head>
+
+<body>
+    {% block content %}
+    <h2>{{user_id}}</h2>
+
+    <p>The average sentiment hacker news sentiment for {{user_id}} is {{ user_average_sentiment }}.</p>
+    <canvas id="bar-chart" width="800" height="450"></canvas>
+
+
+    {% block javascript %}
+    <script>
+        labels = JSON.parse({{ keys | tojson}})
+	data = JSON.parse({{ values |tojson }})
+        new Chart(document.getElementById("bar-chart"), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: "% of mentions in this sentiment range",
+                        backgroundColor: ["rgba(192, 0, 14, 0.5)",,
+                        "rgba(250, 97, 109, 0.5)",
+                        "rgba(29, 211, 0, 0.5)"],
+                        borderColor: ["rgba(192, 0, 14)","rgba(250, 97, 109)",
+                        "rgba(29, 211, 0)"],
+                        
+                        borderWidth:2,
+                        data: data
+                    }
+                ]
+
+            },
+            options: {
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: 'Hacker news sentiment'
+                }
+            }
+        });
+        
+
+    </script>
+
+    {% endblock %}
+	<script>
+	console.log(JSON.parse({{ keys | tojson}}))
+	console.log(JSON.parse({{ values |tojson }}))
+
+	</script>	
+    {% endblock %}
+
+</body>
