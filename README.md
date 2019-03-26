@@ -1,3 +1,5 @@
+Live version here: https://hn-comments.herokuapp.com/
+
 A backend for retrieving sentiment analysis on hacker news comments.
 
 
