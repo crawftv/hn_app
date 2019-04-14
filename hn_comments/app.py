@@ -24,49 +24,61 @@ def create_app():
 
     @app.route('/topic', methods=['GET'])
     def topic():
+        """ query the db,
+        store number of results for reuse,
+        make a list comprehension of the results,
+        convert it to a histogram,
+        use json.dumps to put it into a frontend-usable format,
+        average the compound sentiment,
+        pass it to the frontend.
+        Or return error message.
+        """
+
         topic = request.values["topic"]
         topic = topic.replace("_", " ")
         if request.method == "GET":
             query = DB.session.query(Comments).filter(
                 Comments.text.like('%'+topic+'%')).limit(2500).all()
             num_results = len(query)
-            compound = [q.compound for q in query]
-            hist = np.histogram(compound, bins=10, range=(-1,1))
-         
-            data = json.dumps([int(hist[0][i])/num_results*100  for i in range(len(hist[0]))] )
-            compound_sentiment = functools.reduce(
-                lambda x, y: x+y, compound) / num_results
-        return render_template("topic_sentiment.html", 
-        compound_sentiment =compound_sentiment, topic= topic, data = data)
-
+            if num_results > 0:
+                compound = [q.compound for q in query]
+                hist = np.histogram(compound, bins=10, range=(-1,1))
+                data = json.dumps([int(hist[0][i])/num_results*100  for i in range(len(hist[0]))] )
+                compound_sentiment = functools.reduce(
+                    lambda x, y: x+y, compound) / num_results
+                return render_template("topic_sentiment.html",
+                compound_sentiment =compound_sentiment, topic= topic, data = data)
+            else:
+                return render_template("no_results.html")
     @app.route('/user_sentiment', methods=['GET'])
     def user_sentiment():
         user_id = request.values["user_id"]
         query = DB.session.query(Comments).filter_by(
                 user_id=user_id).limit(500).all()
- 
-        def avg_sentiment(query):
-            num_results = len(query)
-            compound_sentiment = functools.reduce(
-                lambda x, y: x+y, [q.compound for q in query]) / num_results
-            compound_sentiment = json.dumps(compound_sentiment)
-            return compound_sentiment
-        def sentiment_dictionary(query):
-            sentiment = [q.sentiment for q in query]
-            sentiment =  Counter(sentiment)
-            keys = json.dumps(list(sentiment.keys()))
-            values = json.dumps(list(sentiment.values()))
-            return keys, values
-        #def top_10_saltiest_comments(user_id): 
-        #   top_10 = DB.session.query(Comments.text, Comments.compound).filter_by(
-#                user_id=user_id).order_by(Comments.compound.asc()).limit(10).all()
- #           top_10 =json.dumps(top_10)
-  #          return top_10
-        keys, values = sentiment_dictionary(query)
-        return render_template("user_sentiment.html",
-                user_average_sentiment=avg_sentiment(query), keys = keys,  values =
-                values, user_id=user_id)
-
+        if len(query)> 0:
+            def avg_sentiment(query):
+                num_results = len(query)
+                compound_sentiment = functools.reduce(
+                    lambda x, y: x+y, [q.compound for q in query]) / num_results
+                compound_sentiment = json.dumps(compound_sentiment)
+                return compound_sentiment
+            def sentiment_dictionary(query):
+                sentiment = [q.sentiment for q in query]
+                sentiment =  Counter(sentiment)
+                keys = json.dumps(list(sentiment.keys()))
+                values = json.dumps(list(sentiment.values()))
+                return keys, values
+            #def top_10_saltiest_comments(user_id): 
+            #   top_10 = DB.session.query(Comments.text, Comments.compound).filter_by(
+    #                user_id=user_id).order_by(Comments.compound.asc()).limit(10).all()
+     #           top_10 =json.dumps(top_10)
+      #          return top_10
+            keys, values = sentiment_dictionary(query)
+            return render_template("user_sentiment.html",
+                    user_average_sentiment=avg_sentiment(query), keys = keys,  values =
+                    values, user_id=user_id)
+        else:
+            return render_template("no_results.html")
 
 
 
