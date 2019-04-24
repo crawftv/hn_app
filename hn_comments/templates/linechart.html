@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.js"> </script>
+</head>
+
+<body>
+    {% block content %}
+    <h2>{{topic}}</h2>
+
+    <p>The average sentiment hacker news sentiment for {{topic}} over time.</p>
+    <canvas id="line-chart" width="800" height="450"></canvas>
+
+
+    {% block javascript %}
+	<script>
+	labels = JSON.parse({{ labels | tojson }})
+	data = JSON.parse({{ data | tojson }})
+	new Chart(document.getElementById("line-chart"),{
+		"type":"line",
+		"data":
+			{"labels":labels,
+			"datasets":[{"label":"Sentiment Over Time",
+			"data":	data,
+			"fill":false,
+			"borderColor":"rgb(75, 192, 192)",
+			"lineTension":0.1}]},
+		"options":{}});
+
+
+    	</script>
+
+    {% endblock %}
+    {% endblock %}
+
+</body>

@@ -7,8 +7,8 @@ from .models import DB, Comments
 import numpy as np
 from collections import Counter
 import functools
-
-
+from datetime import datetime
+import itertools
 def create_app():
     app = Flask(__name__)
     CORS(app)
@@ -61,7 +61,7 @@ def create_app():
                 sentiment = functools.reduce(
                     lambda x, y: x+y, [q.sentiment for q in query]) / num_results
                 sentiment = json.dumps(sentiment)
-                return compound_sentiment
+                return sentiment
             def sentiment_dictionary(query):
                 sentiment = [q.sentiment for q in query]
                 sentiment =  Counter(sentiment)
@@ -80,8 +80,28 @@ def create_app():
         else:
             return render_template("no_results.html")
 
+    @app.route('/line', methods =["GET"])
+    def line_chart():
+        topic = request.values["topic"]
+        topic = topic.replace("_", " ")
 
-
+        query = DB.session.query(Comments).filter(Comments.text.like('%'+topic+"%")).limit(2500).all()
+        if len(query) > 0:
+            def get_date(ts):
+                return datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d')
+            query = [ (get_date(q.time),q.sentiment ) for q in query ]
+            y = [ (key, list(num for _, num in value)) for key, value in
+                    itertools.groupby(query, lambda x:x[0])]
+            def avg(lst):
+                return sum(lst)/len(lst)
+            labels = [ y[i][0] for i in range(len(y)) ][::-1]
+            data = [ avg(y[i][1]) for i in range(len(y)) ][::-1]
+            labels = json.dumps(labels)
+            data= json.dumps(data)
+            return render_template("linechart.html", data =
+                    data,labels=labels, topic = topic)
+        else:
+            return render_template("no_results.html")
 
 
 
