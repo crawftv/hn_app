@@ -85,7 +85,7 @@ def create_app():
         topic = request.values["topic"]
         topic = topic.replace("_", " ")
 
-        query = DB.session.query(Comments).filter(Comments.text.like('%'+topic+"%")).limit(2500).all()
+        query = DB.session.query(Comments).filter(Comments.text.like('%'+topic+"%")).order_by(Comments.time.asc()).all()
         if len(query) > 0:
             def get_date(ts):
                 return datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d')
@@ -94,8 +94,8 @@ def create_app():
                     itertools.groupby(query, lambda x:x[0])]
             def avg(lst):
                 return sum(lst)/len(lst)
-            labels = [ y[i][0] for i in range(len(y)) ][::-1]
-            data = [ avg(y[i][1]) for i in range(len(y)) ][::-1]
+            labels = [ y[i][0] for i in range(len(y))]
+            data = [ avg(y[i][1]) for i in range(len(y)) ]
             labels = json.dumps(labels)
             data= json.dumps(data)
             return render_template("linechart.html", data =

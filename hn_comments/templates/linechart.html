@@ -10,8 +10,9 @@
     <h2>{{topic}}</h2>
 
     <p>The average sentiment hacker news sentiment for {{topic}} over time.</p>
-    <canvas id="line-chart" width="800" height="450"></canvas>
-
+    <div>
+	    <canvas id="line-chart" class="chartsjs" width="800" height="450" sytle="display:block; width:800, height:450"></canvas>
+	</div>
 
     {% block javascript %}
 	<script>
