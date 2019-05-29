@@ -98,14 +98,19 @@ def user_sentiment():
         return render_template("no_results.html")
 
 
-@app.route("/line", methods=["GET"])
-def line_chart():
-    topic = request.values["topic"]
-    topic = topic.replace("_", " ")
+@app.route("/topic-timeline/<topic>", methods=["GET"])
+def topic_timeline(topic):
+    data ,labels = line_chart(topic)
+    return render_template("linechart.html", data=data, labels=labels, topic=topic)
+
+
+"""React App funtionality"""
+
+def line_chart(search):
 
     query = (
         DB.session.query(Comments)
-        .filter(Comments.text.like("%" + topic + "%"))
+        .filter(Comments.text.like("%" + search + "%"))
         .order_by(Comments.time.asc())
         .all()
     )
@@ -127,14 +132,8 @@ def line_chart():
         data = [avg(y[i][1]) for i in range(len(y))]
         labels = json.dumps(labels)
         data = json.dumps(data)
-        return render_template("linechart.html", data=data, labels=labels, topic=topic)
-    else:
-        return render_template("no_results.html")
-
-
-"""React App funtionality"""
-
-
+        return data, labels
+ 
 @app.route("/user_lookup/<user_id>", methods=["GET"])
 def user_lookup(user_id):
     def avg_sentiment(user_id):
