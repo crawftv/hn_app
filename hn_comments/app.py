@@ -98,13 +98,15 @@ def user_sentiment():
         return render_template("no_results.html")
 
 
-@app.route("/topic-timeline/<topic>", methods=["GET"])
-def topic_timeline(topic):
-    data ,labels = line_chart(topic)
+@app.route("/topic-timeline/", methods=["POST"])
+def topic_timeline():
+    topic = request.values["topic"]
+    data, labels = line_chart(topic)
     return render_template("linechart.html", data=data, labels=labels, topic=topic)
 
 
 """React App funtionality"""
+
 
 def line_chart(search):
 
@@ -133,7 +135,8 @@ def line_chart(search):
         labels = json.dumps(labels)
         data = json.dumps(data)
         return data, labels
- 
+
+
 @app.route("/user_lookup/<user_id>", methods=["GET"])
 def user_lookup(user_id):
     def avg_sentiment(user_id):
