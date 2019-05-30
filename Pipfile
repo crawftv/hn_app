@@ -15,7 +15,7 @@ flask-cors = "*"
 numpy = "*"
 sqlalchemy = "*"
 jinja2 = ">=2.10.1" 
-
+black = "*"
 
 [requires]
 python_version = "3.6"

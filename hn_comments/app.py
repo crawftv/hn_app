@@ -62,40 +62,19 @@ def topic():
 @app.route("/user_sentiment", methods=["GET"])
 def user_sentiment():
     user_id = request.values["user_id"]
-    query = DB.session.query(Comments).filter_by(by=user_id).limit(500).all()
-    if len(query) > 0:
+    if request.method == "GET":
+        query = DB.session.query(Comments).filter_by(by=user_id).limit(2500).all()
+        num_results = len(query)
+        if num_results > 0:
+            user_average_sentiment = avg_sentiment(query, num_results)
+            data = sentiment_histogram(query, num_results)
 
-        def avg_sentiment(query):
-            num_results = len(query)
-            sentiment = (
-                functools.reduce(lambda x, y: x + y, [q.sentiment for q in query])
-                / num_results
+            return render_template(
+                "user_sentiment.html",
+                user_average_sentiment=user_average_sentiment, user_id=user_id,data=data
             )
-            sentiment = json.dumps(sentiment)
-            return sentiment
-
-        def sentiment_dictionary(query):
-            sentiment = [q.sentiment for q in query]
-            sentiment = Counter(sentiment)
-            keys = json.dumps(list(sentiment.keys()))
-            values = json.dumps(list(sentiment.values()))
-            return keys, values
-
-        # def top_10_saltiest_comments(user_id):
-        #   top_10 = DB.session.query(Comments.text, Comments.compound).filter_by(
-        #                user_id=user_id).order_by(Comments.compound.asc()).limit(10).all()
-        #           top_10 =json.dumps(top_10)
-        #          return top_10
-        keys, values = sentiment_dictionary(query)
-        return render_template(
-            "user_sentiment.html",
-            user_average_sentiment=avg_sentiment(query),
-            keys=keys,
-            values=values,
-            user_id=user_id,
-        )
-    else:
-        return render_template("no_results.html")
+        else:
+            return render_template("no_results.html")
 
 
 @app.route("/topic-timeline/", methods=["POST"])
@@ -105,8 +84,23 @@ def topic_timeline():
     return render_template("linechart.html", data=data, labels=labels, topic=topic)
 
 
-"""React App funtionality"""
 
+def avg_sentiment(query, num_results):
+    avg_sentiment = (
+        functools.reduce(lambda x, y: x + y, [q.sentiment for q in query])
+        / num_results
+    )
+    avg_sentiment = json.dumps(avg_sentiment)
+    return avg_sentiment
+
+def sentiment_histogram(query, num_results):
+    sentiment = [q.sentiment for q in query]
+    hist = np.histogram(sentiment, bins=10, range=(-1, 1))
+    # converts histogram results to %'s
+    hist = json.dumps(
+        [int(hist[0][i]) / num_results * 100 for i in range(len(hist[0]))]
+    )
+    return hist
 
 def line_chart(search):
 
@@ -135,8 +129,14 @@ def line_chart(search):
         labels = json.dumps(labels)
         data = json.dumps(data)
         return data, labels
+            
 
-
+# def top_10_saltiest_comments(user_id):
+#   top_10 = DB.session.query(Comments.text, Comments.compound).filter_by(
+#                user_id=user_id).order_by(Comments.compound.asc()).limit(10).all()
+#           top_10 =json.dumps(top_10)
+#          return top_10
+"""React App funtionality"""
 @app.route("/user_lookup/<user_id>", methods=["GET"])
 def user_lookup(user_id):
     def avg_sentiment(user_id):
