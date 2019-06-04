@@ -9,13 +9,13 @@
     {% block content %}
     <h2>{{topic}}</h2>
 
-    <p>The average sentiment hacker news sentiment for {{topic}} is {{ compound_sentiment }}.</p>
-    <canvas id="bar-chart" width="800" height="450"></canvas>
+    <p>The average sentiment hacker news sentiment for {{topic}} is {{ sentiment }}.</p>
+    <canvas id="bar-chart" width="3" height="1"></canvas>
 
 
     {% block javascript %}
     <script>
-        hist = JSON.parse({{ data | tojson}})
+        hist = JSON.parse({{ data|tojson}})
         new Chart(document.getElementById("bar-chart"), {
             type: 'bar',
             data: {
