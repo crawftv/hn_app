@@ -8,14 +8,13 @@ verify_ssl = true
 [packages]
 flask = "*"
 flask-sqlalchemy = "*"
-gunicorn = "*"
 psycopg2 = "*"
 python-decouple = "*"
 flask-cors = "*"
 numpy = "*"
 sqlalchemy = "*"
 jinja2 = ">=2.10.1" 
-black = "*"
+jupyter = "*"
 
 [requires]
 python_version = "3.6"
