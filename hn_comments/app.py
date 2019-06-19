@@ -10,6 +10,7 @@ import functools
 from datetime import datetime
 import itertools
 
+
 app = Flask(__name__)
 CORS(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = config("DATABASE_URL")
@@ -71,7 +72,9 @@ def user_sentiment():
 
             return render_template(
                 "user_sentiment.html",
-                user_average_sentiment=user_average_sentiment, user_id=user_id,data=data
+                user_average_sentiment=user_average_sentiment,
+                user_id=user_id,
+                data=data,
             )
         else:
             return render_template("no_results.html")
@@ -84,14 +87,13 @@ def topic_timeline():
     return render_template("linechart.html", data=data, labels=labels, topic=topic)
 
 
-
 def avg_sentiment(query, num_results):
     avg_sentiment = (
-        functools.reduce(lambda x, y: x + y, [q.sentiment for q in query])
-        / num_results
+        functools.reduce(lambda x, y: x + y, [q.sentiment for q in query]) / num_results
     )
     avg_sentiment = json.dumps(avg_sentiment)
     return avg_sentiment
+
 
 def sentiment_histogram(query, num_results):
     sentiment = [q.sentiment for q in query]
@@ -101,6 +103,7 @@ def sentiment_histogram(query, num_results):
         [int(hist[0][i]) / num_results * 100 for i in range(len(hist[0]))]
     )
     return hist
+
 
 def line_chart(search):
 
@@ -129,7 +132,7 @@ def line_chart(search):
         labels = json.dumps(labels)
         data = json.dumps(data)
         return data, labels
-            
+
 
 # def top_10_saltiest_comments(user_id):
 #   top_10 = DB.session.query(Comments.text, Comments.compound).filter_by(
@@ -137,6 +140,8 @@ def line_chart(search):
 #           top_10 =json.dumps(top_10)
 #          return top_10
 """React App funtionality"""
+
+
 @app.route("/user_lookup/<user_id>", methods=["GET"])
 def user_lookup(user_id):
     def avg_sentiment(user_id):
@@ -217,4 +222,3 @@ if __name__ == "__main__":
 #         hist = jsonify(hist)
 
 #     return render_template('topic.html', hist=hist)
->>>>>>> 471e55bec026eb9fdd14af3237f9c1def4e7b8e1
