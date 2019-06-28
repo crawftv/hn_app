@@ -17,8 +17,8 @@ def backfill():
     now = datetime.datetime.now()
 
     pm.execute_notebook(
-        "hn_etl_back_fill.ipynb",
-        "s3://python-portfolio-notebooks/hn_updates/test"
+        "etl/hn_etl_back_fill.ipynb",
+        "s3://python-portfolio-notebooks/hn_updates/backfill"
         + str(now.year)
         + "-"
         + str(now.month)
@@ -32,8 +32,8 @@ def backfill():
 def frontfill():
     now = datetime.datetime.now()
     pm.execute_notebook(
-        "hn_etl_front_fill.ipynb",
-        "s3://python-portfolio-notebooks/hn_updates/test"
+        "etl/hn_etl_front_fill.ipynb",
+        "s3://python-portfolio-notebooks/hn_updates/frontfill"
         + str(now.year)
         + "-"
         + str(now.month)
@@ -48,7 +48,7 @@ def test_changes():
 
     now = datetime.datetime.now()
     pm.execute_notebook(
-        "hn_data_test.ipynb",
+        "etl/hn_data_test.ipynb",
         "s3://python-portfolio-notebooks/hn_updates/test"
         + str(now.year)
         + "-"
