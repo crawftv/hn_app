@@ -6,6 +6,10 @@ verify_ssl = true
 [dev-packages]
 black = "==19.3b0"
 blackcellmagic = "*"
+pandas = "*"
+papermill = {extras = ["s3"],version = "*"}
+python-decouple = "*"
+python-dateutil = "*"
 
 [packages]
 flask = "*"
@@ -17,6 +21,10 @@ numpy = "*"
 sqlalchemy = "*"
 jinja2 = ">=2.10.1" 
 jupyter = "*"
+prefect = "*"
 
 [requires]
 python_version = "3.6"
+
+[pipenv]
+allow_prereleases = true
