@@ -218,4 +218,5 @@ hn_comments/.vscode/
 .vscode/
 
 hn_app_venv/
+*.pem
 

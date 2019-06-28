@@ -10,45 +10,58 @@ client = boto3.client(
     aws_access_key_id=config("AWS_ACCESS_KEY_ID"),
     aws_secret_access_key=config("AWS_SECRET_ACCESS_KEY"),
 )
+
+
 @task
-def notebook_test():
-	now = datetime.datetime.now()
+def backfill():
+    now = datetime.datetime.now()
 
-	pm.execute_notebook(
-	    "hn_etl_back_fill.ipynb",
-	    "s3://python-portfolio-notebooks/hn_updates/test"
-	    + str(now.year)
-	    + "-"
-	    + str(now.month)
-	    + "-"
-	    + str(now.day)
-	    + ".ipynb",
-	)
-
-	pm.execute_notebook(
-	    "hn_etl_front_fill.ipynb",
-	    "s3://python-portfolio-notebooks/hn_updates/test"
-	    + str(now.year)
-	    + "-"
-	    + str(now.month)
-	    + "-"
-	    + str(now.day)
-	    + ".ipynb",
-	)
+    pm.execute_notebook(
+        "hn_etl_back_fill.ipynb",
+        "s3://python-portfolio-notebooks/hn_updates/test"
+        + str(now.year)
+        + "-"
+        + str(now.month)
+        + "-"
+        + str(now.day)
+        + ".ipynb",
+    )
 
 
-	pm.execute_notebook(
-	    "hn_data_test.ipynb",
-	    "s3://python-portfolio-notebooks/hn_updates/test"
-	    + str(now.year)
-	    + "-"
-	    + str(now.month)
-	    + "-"
-	    + str(now.day)
-	    + ".ipynb",
-	)
+@task
+def frontfill():
+    now = datetime.datetime.now()
+    pm.execute_notebook(
+        "hn_etl_front_fill.ipynb",
+        "s3://python-portfolio-notebooks/hn_updates/test"
+        + str(now.year)
+        + "-"
+        + str(now.month)
+        + "-"
+        + str(now.day)
+        + ".ipynb",
+    )
 
-with Flow('Test',schedule =CronSchedule('* * * * *') ) as flow:
-	test = notebook_test()
+
+@task
+def test_changes():
+
+    now = datetime.datetime.now()
+    pm.execute_notebook(
+        "hn_data_test.ipynb",
+        "s3://python-portfolio-notebooks/hn_updates/test"
+        + str(now.year)
+        + "-"
+        + str(now.month)
+        + "-"
+        + str(now.day)
+        + ".ipynb",
+    )
+
+
+with Flow("ETL", schedule=CronSchedule("* * * * *")) as flow:
+    frontfill = frontfill()
+    backfill = backfill()
+    test_changes = test_changes()
 
 flow.run()
