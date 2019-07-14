@@ -59,9 +59,11 @@ def test_changes():
     )
 
 
-with Flow("ETL", schedule=CronSchedule("0 9 * * *")) as flow:
+with Flow("ETL", schedule=CronSchedule("* * * * *")) as flow:
+    test_changes = test_changes()
     frontfill = frontfill()
     backfill = backfill()
-    test_changes = test_changes()
+   
 
-flow.run()
+if __name__=="__main__":
+    flow.run()
