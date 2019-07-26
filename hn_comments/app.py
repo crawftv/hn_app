@@ -47,7 +47,7 @@ def topic():
         )
         num_results = len(query)
         if num_results > 0:
-            sentiment = [q.sentiment for q in query]
+            sentiment = [q.sentiment for q in query if q.sentiment is not None]
             hist = np.histogram(sentiment, bins=10, range=(-1, 1))
             data = json.dumps(
                 [int(hist[0][i]) / num_results * 100 for i in range(len(hist[0]))]
@@ -89,14 +89,17 @@ def topic_timeline():
 
 def avg_sentiment(query, num_results):
     avg_sentiment = (
-        functools.reduce(lambda x, y: x + y, [q.sentiment for q in query]) / num_results
+        functools.reduce(
+            lambda x, y: x + y, [q.sentiment for q in query if q.sentiment is not None]
+        )
+        / num_results
     )
     avg_sentiment = json.dumps(avg_sentiment)
     return avg_sentiment
 
 
 def sentiment_histogram(query, num_results):
-    sentiment = [q.sentiment for q in query]
+    sentiment = [q.sentiment for q in query if q.sentiment is not None]
     hist = np.histogram(sentiment, bins=10, range=(-1, 1))
     # converts histogram results to %'s
     hist = json.dumps(
@@ -118,7 +121,11 @@ def line_chart(search):
         def get_date(ts):
             return datetime.utcfromtimestamp(ts).strftime("%Y-%m-%d")
 
-        query = [(get_date(int(q.time)), float(q.sentiment)) for q in query]
+        query = [
+            (get_date(int(q.time)), float(q.sentiment))
+            for q in query
+            if q.sentiment is not None
+        ]
         y = [
             (key, list(num for _, num in value))
             for key, value in itertools.groupby(query, lambda x: x[0])
@@ -182,7 +189,10 @@ def topic_sentiment(topic):
         )
         num_results = len(query)
         sentiment = (
-            functools.reduce(lambda x, y: x + y, [q.sentiment for q in query])
+            functools.reduce(
+                lambda x, y: x + y,
+                [q.sentiment for q in query if q.sentiment is not None],
+            )
             / num_results
         )
     return jsonify(sentiment=sentiment)
