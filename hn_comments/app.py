@@ -13,7 +13,7 @@ import itertools
 
 app = Flask(__name__)
 CORS(app)
-app.config["SQLALCHEMY_DATABASE_URI"] = config("DATABASE_URL")
+app.config["SQLALCHEMY_DATABASE_URI"] = config("AWS_DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 DB.init_app(app)
@@ -118,7 +118,7 @@ def line_chart(search):
         def get_date(ts):
             return datetime.utcfromtimestamp(ts).strftime("%Y-%m-%d")
 
-        query = [(get_date(q.time), q.sentiment) for q in query]
+        query = [(get_date(int(q.time)), float(q.sentiment)) for q in query]
         y = [
             (key, list(num for _, num in value))
             for key, value in itertools.groupby(query, lambda x: x[0])
