@@ -22,6 +22,7 @@ sqlalchemy = "*"
 jinja2 = ">=2.10.1" 
 jupyter = "*"
 prefect = "*"
+python-dotenv = "*"
 
 [requires]
 python_version = "3.6"
