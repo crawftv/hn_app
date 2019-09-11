@@ -47,10 +47,10 @@ def topic():
         )
         num_results = len(query)
         if num_results > 0:
-            sentiment = [q.sentiment for q in query]
+            sentiment = [float(q.sentiment) for q in query if q.sentiment is not None]
             hist = np.histogram(sentiment, bins=10, range=(-1, 1))
             data = json.dumps(
-                [int(hist[0][i]) / num_results * 100 for i in range(len(hist[0]))]
+                [round(int(hist[0][i]) / num_results * 100,1) for i in range(len(hist[0]))]
             )
             sentiment = functools.reduce(lambda x, y: x + y, sentiment) / num_results
             return render_template(
@@ -65,6 +65,7 @@ def user_sentiment():
     user_id = request.values["user_id"]
     if request.method == "GET":
         query = DB.session.query(Comments).filter_by(by=user_id).limit(2500).all()
+        query = [float(q.sentiment) for q in query if q.sentiment is not None]
         num_results = len(query)
         if num_results > 0:
             user_average_sentiment = avg_sentiment(query, num_results)
@@ -88,19 +89,17 @@ def topic_timeline():
 
 
 def avg_sentiment(query, num_results):
-    avg_sentiment = (
-        functools.reduce(lambda x, y: x + y, [q.sentiment for q in query]) / num_results
-    )
+    avg_sentiment = round(functools.reduce(lambda x, y: x + y, query) /
+            num_results,2)*100
     avg_sentiment = json.dumps(avg_sentiment)
     return avg_sentiment
 
 
 def sentiment_histogram(query, num_results):
-    sentiment = [q.sentiment for q in query]
-    hist = np.histogram(sentiment, bins=10, range=(-1, 1))
+    hist = np.histogram(query, bins=10, range=(-1, 1))
     # converts histogram results to %'s
     hist = json.dumps(
-        [int(hist[0][i]) / num_results * 100 for i in range(len(hist[0]))]
+        [round(int(hist[0][i]) / num_results * 100,1) for i in range(len(hist[0]))]
     )
     return hist
 
@@ -118,7 +117,11 @@ def line_chart(search):
         def get_date(ts):
             return datetime.utcfromtimestamp(ts).strftime("%Y-%m-%d")
 
-        query = [(get_date(int(q.time)), float(q.sentiment)) for q in query]
+        query = [
+            (get_date(int(q.time)), float(q.sentiment))
+            for q in query
+            if q.sentiment is not None
+        ]
         y = [
             (key, list(num for _, num in value))
             for key, value in itertools.groupby(query, lambda x: x[0])
@@ -182,7 +185,10 @@ def topic_sentiment(topic):
         )
         num_results = len(query)
         sentiment = (
-            functools.reduce(lambda x, y: x + y, [q.sentiment for q in query])
+            functools.reduce(
+                lambda x, y: x + y,
+                [q.sentiment for q in query if q.sentiment is not None],
+            )
             / num_results
         )
     return jsonify(sentiment=sentiment)
