@@ -22,11 +22,8 @@ sqlalchemy = "*"
 jinja2 = ">=2.10.1" 
 jupyter = "*"
 prefect = "*"
-<<<<<<< HEAD
 blackcellmagic = "*"
-=======
 python-dotenv = "*"
->>>>>>> 8f7c3a5c2b099d8fe46eb0084d033b7c3fa266fd
 
 [requires]
 python_version = "3.6"
