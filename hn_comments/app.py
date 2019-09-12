@@ -114,11 +114,8 @@ def line_chart(search):
     )
     if len(query) > 0:
 
-        def get_date(ts):
-            return datetime.utcfromtimestamp(ts).strftime("%Y-%m-%d")
-
         query = [
-            (get_date(int(q.time)), float(q.sentiment))
+            (q.time, float(q.sentiment))
             for q in query
             if q.sentiment is not None
         ]
